@@ -3,13 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link rel="icon" href="data:image/svg+xml,
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <text y='.9em' font-size='90'>🦇</text>
-  </svg>">
-
-  
   <title>A Message from Gotham 🦇</title>
 
   <style>
@@ -121,6 +114,27 @@
       display: block;
     }
 
+    .custom-btn {
+      background: #2a2a2a;
+      color: #ffffff;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .custom-btn:hover {
+      background: #333;
+      transform: translateY(-1px);
+    }
+
+    .custom-btn:active {
+      transform: scale(0.96);
+    }
+
+
 
     @keyframes fadeIn {
       from {
@@ -215,32 +229,84 @@
     but because love stands watch. 💛
   </p>
   <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
+
+  <div class="btn-group" style="margin-top: 1.5rem;">
+      <button class="noBtn" onclick="goToStep('contact')">
+          Create One for Someone Special ✨
+      </button>
+  </div>
+
+  <p style="font-size:0.75rem; opacity:0.6; margin-top:0.4rem;">
+      Handcrafted with care
+  </p>
 </div>
+
+<div id="stepContact" class="card hidden">
+    <div class="bat-icon">✨</div>
+
+    <h1 style="color:#f9d71c;">Create Your Own Story</h1>
+
+    <p style="font-size: 0.95rem; line-height: 1.6; margin-top: 1rem;">
+        If this story made someone smile,  
+        I can help you create one that’s truly yours.
+    </p>
+
+    <p style="font-size: 0.85rem; opacity: 0.75; margin-top: 0.8rem;">
+        Whether it’s for a partner, a friend,  
+        or someone special —  
+        I’ll help you turn your feelings into a story.
+    </p>
+
+    <div class="btn-group" style="margin-top: 1.4rem;">
+        <a 
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=studiomogliinc@gmail.com
+          &su=Custom%20Story%20Request
+          &body=Hi%2C%20I%20saw%20your%20Batman%20story%20and%20would%20love%20a%20custom%20one."
+          target="_blank"
+          class="custom-btn"
+        >
+            Send an Email ✉️
+        </a>
+
+    </div>
+
+
+    <p style="font-size:0.7rem; opacity:0.5; margin-top:1rem;">
+        No pressure. Just creativity & care.
+    </p>
+</div>
+
 
 <script>
   function goToStep(step) {
     const steps = [
-      'step1','stepMad','stepSuccess',
-      'stepThird','stepFourth',
-      'stepFifth','stepSixth'
+      'step1',
+      'stepMad',
+      'stepSuccess',
+      'stepThird',
+      'stepFourth',
+      'stepFifth',
+      'stepSixth',
+      'stepContact'
     ];
 
+    // Hide all steps
     steps.forEach(id => {
-      document.getElementById(id).classList.add('hidden');
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
     });
 
-    document.getElementById(
-      step === 'success' ? 'stepSuccess' :
-      step === 'mad' ? 'stepMad' :
-      step === 'third' ? 'stepThird' :
-      step === 'fourth' ? 'stepFourth' :
-      step === 'fifth' ? 'stepFifth' :
-      'stepSixth'
-    ).classList.remove('hidden');
+    // Show requested step
+    if (step === 'success') document.getElementById('stepSuccess').classList.remove('hidden');
+    else if (step === 'mad') document.getElementById('stepMad').classList.remove('hidden');
+    else if (step === 'third') document.getElementById('stepThird').classList.remove('hidden');
+    else if (step === 'fourth') document.getElementById('stepFourth').classList.remove('hidden');
+    else if (step === 'fifth') document.getElementById('stepFifth').classList.remove('hidden');
+    else if (step === 'sixth') document.getElementById('stepSixth').classList.remove('hidden');
+    else if (step === 'contact') document.getElementById('stepContact').classList.remove('hidden');
   }
 </script>
 
+
 </body>
-
 </html>
-
