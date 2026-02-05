@@ -349,6 +349,19 @@
         </a>
       </div>
 
+      <p style="font-size:0.75rem; opacity:0.6; margin-top:0.6rem;">
+        Or email me at  
+        <span 
+          style="color:#f9d71c; cursor:pointer;"
+          onclick="copyEmail()"
+        >
+          studiomogliinc@gmail.com
+        </span>
+      </p>
+
+
+
+
 
 
 
@@ -408,6 +421,21 @@
       toast.classList.remove('show');
       toast.classList.add('hidden');
     }, 1000); // ~1.0 seconds
+  }
+
+  function copyEmail() {
+    navigator.clipboard.writeText('studiomogliinc@gmail.com');
+
+    const toast = document.getElementById('toast');
+    toast.textContent = 'Email copied ✨'; // change message dynamically
+    toast.classList.remove('hidden');
+    toast.classList.add('show');
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.classList.add('hidden');
+      toast.textContent = 'Link copied ✨'; // reset for link button
+    }, 2300);
   }
 </script>
 
