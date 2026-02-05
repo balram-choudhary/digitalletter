@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Message from Gotham 🦇</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    .card {
+      background: #1e1e1e;
+      padding: 1.5rem;
+      border-radius: 20px;
+      border: 3px solid #f9d71c;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(249, 215, 28, 0.2);
+      max-width: 350px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn 0.4s ease;
+      scrollbar-width: none;        /* Firefox */
+      -ms-overflow-style: none;     /* IE & Edge */
+    }
+
+    .card::-webkit-scrollbar {
+      display: none;                /* Chrome, Safari */
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+      line-height: 1.3;
+    }
+
+    p {
+      line-height: 1.5;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    button {
+      padding: 10px 25px;
+      font-size: 1rem;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .yesBtn {
+      background: #f9d71c;
+      color: #000;
+      box-shadow: 0 0 10px rgba(249, 215, 28, 0.4);
+    }
+
+    .noBtn {
+      background: #333;
+      color: #fff;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+      margin-top: 1rem;
+    }
+
+    .bat-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .story-img {
+      width: 85%;
+      max-width: 260px;
+      margin: 1rem auto 0;
+      display: block;
+    }
+
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+<!-- STEP 1 -->
+<div id="step1" class="card">
+  <div class="bat-icon">🦇</div>
+  <h1>Do you know it's Valentine's week?</h1>
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('success')">Yes</button>
+    <button class="noBtn" onclick="goToStep('mad')">No</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="stepSuccess" class="card hidden">
+  <h1>Will you be my Valentine? 💛</h1>
+  <img class="story-img" src="https://i.ibb.co/JjQQDBXs/IMG-20260205-002708.png" alt="Valentine Image">
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('fifth')">Yes</button>
+    <button class="noBtn" onclick="goToStep('third')">No</button>
+  </div>
+</div>
+
+<!-- MAD -->
+<div id="stepMad" class="card hidden">
+  <h1 style="color:#ff4444;">Are you mad? 😡</h1>
+  <p>You have to click on Yes!</p>
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('success')">Yes</button>
+  </div>
+</div>
+
+<!-- THIRD -->
+<div id="stepThird" class="card hidden">
+  <h1>Okay… last chance 😌</h1>
+  <img src="https://i.ibb.co/fL8t10M/1770275977684.png" alt="Third Screen">
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
+    <button class="noBtn" onclick="goToStep('fourth')">No 😭</button>
+  </div>
+</div>
+
+<!-- FOURTH -->
+<div id="stepFourth" class="card hidden">
+  <h1 style="color:#f9d71c;">This is hurting Gotham 🦇</h1>
+  <p>
+    Every time you tap <b>No</b>, the Bat-Signal fades a little more.<br>
+    Batman doesn’t cry… but tonight, even Gotham feels lonely.<br>
+    Don’t let the Dark Knight lose hope 💔
+  </p>
+  <img src="https://i.ibb.co/75XTt5Q/1770276556565.png" alt="Sad Batman">
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
+  </div>
+</div>
+
+<!-- FIFTH -->
+<div id="stepFifth" class="card hidden">
+  <h1 style="color:#f9d71c;">Welcome to Gotham 💛🦇</h1>
+  <p>
+    You’ve proven your courage, your kindness, and your heart.<br><br>
+    From this moment on, you’re not just my Valentine —<br>
+    you’re my <b>Batgirl</b>.
+  </p>
+  <img src="https://i.ibb.co/nNK0BqVB/1770277086062.png" alt="Batgirl">
+  <div class="btn-group">
+    <button class="yesBtn" onclick="goToStep('sixth')">Light the Bat-Signal 🦇</button>
+  </div>
+</div>
+
+<!-- SIXTH -->
+<div id="stepSixth" class="card hidden">
+  <div class="bat-icon">🦇</div>
+  <h1 style="color:#f9d71c;">Together, We Are Gotham</h1>
+  <p>
+    The city sleeps peacefully tonight.<br>
+    Not because darkness is gone —<br>
+    but because love stands watch. 💛
+  </p>
+  <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
+</div>
+
+<script>
+  function goToStep(step) {
+    const steps = [
+      'step1','stepMad','stepSuccess',
+      'stepThird','stepFourth',
+      'stepFifth','stepSixth'
+    ];
+
+    steps.forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+
+    document.getElementById(
+      step === 'success' ? 'stepSuccess' :
+      step === 'mad' ? 'stepMad' :
+      step === 'third' ? 'stepThird' :
+      step === 'fourth' ? 'stepFourth' :
+      step === 'fifth' ? 'stepFifth' :
+      'stepSixth'
+    ).classList.remove('hidden');
+  }
+</script>
+
+</body>
+</html>
