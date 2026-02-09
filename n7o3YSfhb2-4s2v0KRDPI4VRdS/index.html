@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The City at Night — Valentine</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      background: #0b0e14;
+      color: #eaeaea;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Scene container */
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 1.2s ease, transform 1.6s ease;
+      transform: scale(1.03);
+      overflow: hidden;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0.55) 70%,
+        rgba(0, 0, 0, 0.85) 100%
+      );
+      z-index: 0;
+    }
+
+    /* Overlay for text and buttons */
+    .overlay {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      padding: 36px;
+      border-radius: 18px;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.65),
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0)
+      );
+      text-align: center;
+    }
+
+    /* Typewriter text */
+    .typed-text {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Blinking cursor for typewriter */
+    .typed-text::after {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 1.2rem;
+      background: #fff;
+      margin-left: 6px;
+      animation: blink 1s infinite;
+    }
+
+    .typed-text.done::after {
+      opacity: 0;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Buttons */
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 22px;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: buttonIn 1.2s ease forwards;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes buttonIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: scale(1.05);
+    }
+
+    /* Rain effect */
+    .rain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .raindrop {
+      position: absolute;
+      width: 1px;
+      height: 10px;
+      background: linear-gradient(to bottom, transparent, rgba(174, 194, 224, 0.8));
+      border-radius: 0 0 5px 5px;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh);
+      }
+    }
+
+    /* Breathing city lights */
+    .city-lights {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(circle at 30% 40%, rgba(253, 180, 98, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 30%, rgba(253, 180, 98, 0.1) 0%, transparent 50%);
+      animation: breathe 8s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Personalization input */
+    .personalize {
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .personalize.active {
+      opacity: 1;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Final shareable scene */
+    .final-scene {
+      text-align: center;
+    }
+
+    .final-scene img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .overlay {
+        padding: 24px;
+        margin: 0 20px;
+      }
+
+      .typed-text {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scene {
+        transition: opacity 0.4s ease;
+        transform: none;
+      }
+
+      .raindrop,
+      .city-lights {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Ambient sound -->
+  <audio id="ambient-sound" loop>
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-rain-on-a-window-1128.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Scene 1: Entry -->
+  <div class="scene active" id="s1" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/30b47327-3138-4b21-b1a8-63d8aaed3492?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=56aDIn41VV3t3LS15Im7nL9%2BJuUK0fi3voQrzm5cEdQ%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain1"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text1"></div>
+      <div class="buttons">
+        <button onclick="next('s2')">Stay with me</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 2: Street -->
+  <div class="scene" id="s2" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/450f0b87-b002-47a3-bf40-5ec393fecbd8?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=pKabwJCDwN6FmUwGqKc89jvEyvCoNI6GR6K%2FiQSQqtk%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain2"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text2"></div>
+      <div class="buttons">
+        <button onclick="next('s3a')">I like quiet</button>
+        <button onclick="next('s3b')">I’m tired of noise</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3A: Window (Quiet) -->
+  <div class="scene" id="s3a" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/fb3b95c3-2001-4def-9311-40936c4e664e?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=DANm8vcgOTjIFEe1BeZ4F4NtZFKrooXO%2FxXhLij936Y%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain3"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text3a"></div>
+      <div class="buttons">
+        <button onclick="next('s4')">Look at the city</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3B: Window (Tired of Noise) -->
+  <div class="scene" id="s3b" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/fb3b95c3-2001-4def-9311-40936c4e664e?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=DANm8vcgOTjIFEe1BeZ4F4NtZFKrooXO%2FxXhLij936Y%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain4"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text3b"></div>
+      <div class="buttons">
+        <button onclick="next('s4')">Look at the city</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: City Lights -->
+  <div class="scene" id="s4" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/b65ed08d-62e9-4c44-b193-1bc9686d399e?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=YIqXafEJXvVC%2BysIsVS8QjCGZ%2FYEjE32CQ8outM8SBM%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain5"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text4"></div>
+      <div class="buttons">
+        <button onclick="next('s5')">That feels right</button>
+        <button onclick="next('s5')">That feels intimate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 5: Room -->
+  <div class="scene" id="s5" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/58b3c73f-45c5-4701-ac6d-9110f922b27d?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=bql6QPvFphYhKftegLQshOe5MRVJxPhD7wKkXPpaz7c%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain6"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text5"></div>
+      <div class="buttons">
+        <button onclick="next('s6')">I’m here</button>
+        <button onclick="next('s6')">I didn’t expect this</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 6: Balcony -->
+  <div class="scene" id="s6" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/54105058-c5c2-405c-90fd-a3b7bb7fd282?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=wWdd6LPf1%2BOUQA%2BTOh0od0xyac3iG1Ty96HFgCqkkvA%3D');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain7"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text6"></div>
+      <div class="buttons">
+        <button onclick="next('s7')">Stay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 7: Skyline -->
+  <div class="scene" id="s7" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/6952c5f0-ec1f-4755-8681-d3aefa5e07bd?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=E2p0XOwKl0DhHinsWUzfS75YXlB13tVSHShQjTsShhc%3D'); justify-content: flex-start; padding-left: 8vw;">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain8"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text7"></div>
+      <div class="buttons">
+        <button onclick="next('s8')">Yes</button>
+        <button onclick="next('s8')">Just hold this moment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 8: Couple -->
+  <div class="scene" id="s8" style="background-image: url('https://mistralaichatupprodswe.blob.core.windows.net/chat-images/3e/89/a7/3e89a7b4-b516-4947-b048-771831f14d4a/2507715d-b9d6-4b54-b5a5-1e9a95b032d2/d9ab62ef-e8e6-48ab-841f-743c56f29165?sv=2025-01-05&st=2026-02-09T12%3A10%3A08Z&se=2026-02-09T13%3A10%3A08Z&sr=b&sp=rade&sig=NZEEXBko6MPFS0syAb01f763vOJrh7yL5hefr6GJ3lt8%3D'); background-position: center right;">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain9"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text8"></div>
+      <div class="buttons">
+        <button onclick="next('s9')">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 9: Heart -->
+  <div class="scene" id="s9" style="background-image: url('https://images.openai.com/static-rsc-3/onwDKb2cTaurHtKoLETKs0nBII1xq6eXRbaXA9EugFqGoJL_Okj2qtMMVGsQZQuQp-UrytAHku9y3hVZVKIBLoVLwY51EpUzq_jU2gWaWsY?purpose=fullsize\&v=1');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain10"></div>
+    <div class="overlay">
+      <div class="typed-text" id="text9"></div>
+      <div class="personalize" id="personalize">
+        <input type="text" id="name-input" placeholder="Your name or a message..." />
+        <button onclick="personalizeScene()">Create your Valentine</button>
+      </div>
+      <div class="buttons">
+        <button onclick="next('s10')">Stay a little longer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 10: Dawn -->
+  <div class="scene" id="s10" style="background-image: url('https://images.openai.com/static-rsc-3/cRaAwxF25692LVsrNUQqQvlIpCzvZEa-3FqXXGznT2olT_RNC2GFs46b9EHNieW-hvyIRlQec7MGKvCNPaQ-J0kaZO0SP6DQX33yE4gaDbU?purpose=fullsize\&v=1');">
+    <div class="city-lights"></div>
+    <div class="rain" id="rain11"></div>
+    <div class="overlay final-scene">
+      <div class="typed-text" id="text10"></div>
+      <img id="final-image" style="display: none; margin-top: 20px;" />
+      <div class="buttons">
+        <button onclick="saveMoment()">Save this moment</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Ambient sound
+    const ambientSound = document.getElementById('ambient-sound');
+    ambientSound.volume = 0.3;
+    ambientSound.play().catch(e => console.log("Audio play failed:", e));
+
+    // Rain effect
+    function createRain(sceneId, intensity = 80) {
+      const rainContainer = document.getElementById(sceneId);
+      rainContainer.innerHTML = "";
+
+      for (let i = 0; i < intensity; i++) {
+        const drop = document.createElement('div');
+        drop.classList.add('raindrop');
+        drop.style.left = `${Math.random() * 100}vw`;
+        drop.style.animationDuration = `${0.6 + Math.random()}s`;
+        drop.style.animationDelay = `${Math.random() * 2}s`;
+        rainContainer.appendChild(drop);
+      }
+    }
+
+    // Initialize rain for all scenes
+    createRain("rain1", 120); // Entry – uncertainty
+    createRain("rain2", 110);
+    createRain("rain3", 80);
+    createRain("rain4", 80);
+    createRain("rain5", 60);
+    createRain("rain6", 40);
+    createRain("rain7", 30);
+    createRain("rain8", 20);
+    createRain("rain9", 10);
+    createRain("rain10", 0); // Calm
+    createRain("rain11", 0); // Dawn
+
+    // Typewriter effect
+    function typeWriter(text, element, callback, index = 0) {
+      const speed = text[index] === '\n' ? 600 : 35 + Math.random() * 40;
+
+      if (index < text.length) {
+        element.innerHTML += text.charAt(index);
+        index++;
+        setTimeout(() => typeWriter(text, element, callback, index), speed);
+      } else {
+        setTimeout(() => {
+          element.classList.add('done');
+          if (callback) callback();
+        }, 800);
+      }
+    }
+
+    // Scene texts
+    const sceneTexts = {
+      text1: "It’s Valentine’s night.\n\nThe city looks the same…\n\nBut it feels different.",
+      text2: "Most people celebrate loudly tonight.\n\nReservations. Noise. Crowds.\n\nBut some moments…\n\nare meant to be quiet.",
+      text3a: "Me too.\n\nQuiet lets you feel things properly.",
+      text3b: "Yeah…\n\nLove doesn’t need an audience.",
+      text4: "Every light is someone loving someone.\n\nIn their own way.\n\nRight now.\n\nSome loud.\n\nSome soft.\n\nOurs is soft.",
+      text5: "Valentine’s usually asks for big words.\n\nBig gestures.\n\nBig promises.\n\nBut tonight…\n\nI just wanted you here.",
+      text6: "You staying…\n\nmeans more than you think.",
+      text7: "Can I make this night ours?",
+      text8: "So let’s do this quietly.\n\nNo promises shouted.\n\nNo expectations.\n\nJust you.\n\nAnd me.\n\nAnd the city.",
+      text9: "Happy Valentine’s.\n\nThank you for choosing to be here.",
+      text10: "The night will pass.\n\nThe city will wake.\n\nBut this…\n\nthis stays."
+    };
+
+    // Scene navigation
+    function next(sceneId) {
+      document.querySelectorAll('.scene').forEach(scene => scene.classList.remove('active'));
+      document.getElementById(sceneId).classList.add('active');
+
+      // Start typing for the new scene
+      const textElement = document.getElementById(`text${sceneId.slice(1)}`);
+      textElement.innerHTML = '';
+      typeWriter(sceneTexts[`text${sceneId.slice(1)}`], textElement, () => {
+        if (sceneId === 's9') {
+          document.getElementById('personalize').classList.add('active');
+        }
+      });
+
+      // Show final image if available
+      if (sceneId === 's10' && localStorage.getItem('valentineImage')) {
+        document.getElementById('final-image').src = localStorage.getItem('valentineImage');
+        document.getElementById('final-image').style.display = 'block';
+      }
+    }
+
+    // Personalize the final scene
+    function personalizeScene() {
+      const name = document.getElementById('name-input').value || "you";
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+
+      // Draw a simple heart with a message
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw heart
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath();
+      ctx.moveTo(400, 200);
+      ctx.bezierCurveTo(300, 100, 200, 200, 200, 300);
+      ctx.bezierCurveTo(200, 400, 300, 500, 400, 550);
+      ctx.bezierCurveTo(500, 500, 600, 400, 600, 300);
+      ctx.bezierCurveTo(600, 200, 500, 100, 400, 200);
+      ctx.fill();
+
+      // Add personalized text
+      ctx.fillStyle = '#fff';
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Happy Valentine’s, ${name}`, 400, 500);
+      ctx.fillText("This moment is ours.", 400, 530);
+
+      // Save and display
+      const image = canvas.toDataURL('image/png');
+      localStorage.setItem('valentineImage', image);
+      next('s10');
+    }
+
+    // Save the moment
+    function saveMoment() {
+      const image = localStorage.getItem('valentineImage');
+      if (image) {
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'our-valentine-moment.png';
+        link.click();
+        alert("Your moment has been saved. Thank you for being here.");
+      }
+    }
+
+    // Start the experience
+    window.onload = () => {
+      const textElement = document.getElementById('text1');
+      typeWriter(sceneTexts.text1, textElement);
+    };
+  </script>
+</body>
+</html>
