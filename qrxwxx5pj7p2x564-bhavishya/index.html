@@ -231,17 +231,50 @@
     <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
   </div>
 
+  <div id="stepStudy" class="card hidden">
+    <h1 style="color:#f9d71c;">Reality Check! 📢</h1>
+    <p style="font-size: 1rem; line-height: 1.4; font-weight: bold;">
+      Here is the end of imagination...<br>
+      Your exams are coming!<br>
+      <span style="color:#ff4444;">GO TO STUDY!</span>
+    </p>
+    <img src="https://i.ibb.co/xtRTFqCm/1770363681230.png" alt="Study Batman">
+  </div>
+
+
+
   <script>
     function goToStep(step) {
-      const steps = ['step1', 'stepMad', 'stepSuccess', 'stepThird', 'stepFourth', 'stepFifth', 'stepSixth'];
-      steps.forEach(id => document.getElementById(id).classList.add('hidden'));
-      document.getElementById(step === 'success' ? 'stepSuccess' :
-                              step === 'mad' ? 'stepMad' :
-                              step === 'third' ? 'stepThird' :
-                              step === 'fourth' ? 'stepFourth' :
-                              step === 'fifth' ? 'stepFifth' :
-                              'stepSixth').classList.remove('hidden');
+      const steps = [
+        'step1',
+        'stepMad',
+        'stepSuccess',
+        'stepThird',
+        'stepFourth',
+        'stepFifth',
+        'stepSixth',
+        'stepStudy'
+      ];
+
+      // Hide all steps
+      steps.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      // Show target step
+      const targetId = 'step' + step.charAt(0).toUpperCase() + step.slice(1);
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) targetEl.classList.remove('hidden');
+
+      // Auto redirect to Reality Check after Sixth step
+      if (step === 'sixth') {
+        setTimeout(() => {
+          goToStep('study');
+        }, 5000); // 5 seconds
+      }
     }
   </script>
+
 </body>
 </html>
