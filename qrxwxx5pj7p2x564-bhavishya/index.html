@@ -10,7 +10,7 @@
     <text y=%22.9em%22 font-size=%2290%22>🦇</text>
   </svg>">
 
-  <!-- Google tag (gtag.js) -->
+  <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EH1BP40998"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -25,19 +25,24 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    /* ✅ FIXED BODY FOR MOBILE */
     body {
       background-color: #121212;
       color: #ffffff;
       font-family: Arial, sans-serif;
+
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
+      align-items: flex-start;
+
+      min-height: 100dvh;
       margin: 0;
-      overflow: hidden;
       padding: 10px;
+
+      overflow-y: auto;
     }
 
+    /* ✅ FIXED CARD SCROLLING */
     .card {
       background: #1e1e1e;
       padding: 1.5rem;
@@ -45,13 +50,17 @@
       border: 3px solid #f9d71c;
       text-align: center;
       box-shadow: 0 0 20px rgba(249, 215, 28, 0.2);
-      max-width: 350px;
+
       width: 100%;
-      max-height: 90vh;
+      max-width: 350px;
+      max-height: calc(100dvh - 40px);
+
       overflow-y: auto;
       animation: fadeIn 0.4s ease;
+
       scrollbar-width: none;
       -ms-overflow-style: none;
+      margin: auto;
     }
 
     .card::-webkit-scrollbar {
@@ -109,7 +118,7 @@
       display: none;
     }
 
-    img {
+    img, video {
       max-width: 100%;
       height: auto;
       border-radius: 15px;
@@ -129,10 +138,6 @@
     }
 
     video {
-      width: 85%;
-      max-width: 260px;
-      margin: 1rem auto 0;
-      display: block;
       border-radius: 12px;
     }
 
@@ -150,6 +155,7 @@
 </head>
 
 <body>
+
   <!-- STEP 1 -->
   <div id="step1" class="card">
     <div class="bat-icon">🦇</div>
@@ -184,7 +190,7 @@
   <!-- THIRD -->
   <div id="stepThird" class="card hidden">
     <h1>Okay… last chance 😌</h1>
-    <img src="https://i.ibb.co/fL8t10M/1770275977684.png" alt="Third Screen">
+    <img src="https://i.ibb.co/fL8t10M/1770275977684.png">
     <div class="btn-group">
       <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
       <button class="noBtn" onclick="goToStep('fourth')">No 😭</button>
@@ -196,10 +202,9 @@
     <h1 style="color:#f9d71c;">This is hurting Gotham 🦇</h1>
     <p>
       Every time you tap <b>No</b>, the Bat-Signal fades a little more.<br>
-      Batman doesn’t cry… but tonight, even Gotham feels lonely.<br>
-      Don’t let the Dark Knight lose hope 💔
+      Batman doesn’t cry… but tonight, even Gotham feels lonely 💔
     </p>
-    <img src="https://i.ibb.co/75XTt5Q/1770276556565.png" alt="Sad Batman">
+    <img src="https://i.ibb.co/75XTt5Q/1770276556565.png">
     <div class="btn-group">
       <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
     </div>
@@ -209,11 +214,10 @@
   <div id="stepFifth" class="card hidden">
     <h1 style="color:#f9d71c;">Welcome to Gotham 💛🦇</h1>
     <p>
-      You’ve proven your courage, your kindness, and your heart.<br><br>
       From this moment on, you’re not just my Valentine —<br>
       you’re my <b>Batgirl</b>.
     </p>
-    <img src="https://i.ibb.co/nNK0BqVB/1770277086062.png" alt="Batgirl">
+    <img src="https://i.ibb.co/nNK0BqVB/1770277086062.png">
     <div class="btn-group">
       <button class="yesBtn" onclick="goToStep('sixth')">Light the Bat-Signal 🦇</button>
     </div>
@@ -225,53 +229,40 @@
     <h1 style="color:#f9d71c;">Together, We Are Gotham</h1>
     <p>
       The city sleeps peacefully tonight.<br>
-      Not because darkness is gone —<br>
-      but because love stands watch. 💛
+      Because love stands watch. 💛
     </p>
-    <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
+    <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png">
   </div>
 
+  <!-- STUDY -->
   <div id="stepStudy" class="card hidden">
     <h1 style="color:#f9d71c;">Reality Check! 📢</h1>
-    <p style="font-size: 1rem; line-height: 1.4; font-weight: bold;">
-      Here is the end of imagination...<br>
+    <p style="font-weight:bold;">
       Your exams are coming!<br>
       <span style="color:#ff4444;">GO TO STUDY!</span>
     </p>
-    <img src="https://i.ibb.co/xtRTFqCm/1770363681230.png" alt="Study Batman">
+    <img src="https://i.ibb.co/xtRTFqCm/1770363681230.png">
   </div>
-
-
 
   <script>
     function goToStep(step) {
       const steps = [
-        'step1',
-        'stepMad',
-        'stepSuccess',
-        'stepThird',
-        'stepFourth',
-        'stepFifth',
-        'stepSixth',
-        'stepStudy'
+        'step1','stepMad','stepSuccess','stepThird',
+        'stepFourth','stepFifth','stepSixth','stepStudy'
       ];
 
-      // Hide all steps
       steps.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
 
-      // Show target step
-      const targetId = 'step' + step.charAt(0).toUpperCase() + step.slice(1);
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) targetEl.classList.remove('hidden');
+      const target = document.getElementById(
+        'step' + step.charAt(0).toUpperCase() + step.slice(1)
+      );
+      if (target) target.classList.remove('hidden');
 
-      // Auto redirect to Reality Check after Sixth step
       if (step === 'sixth') {
-        setTimeout(() => {
-          goToStep('study');
-        }, 5000); // 5 seconds
+        setTimeout(() => goToStep('study'), 5000);
       }
     }
   </script>
