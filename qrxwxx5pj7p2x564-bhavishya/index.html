@@ -19,7 +19,6 @@
     gtag('config', 'G-EH1BP40998');
   </script>
 
-  
   <style>
     * {
       box-sizing: border-box;
@@ -51,12 +50,12 @@
       max-height: 90vh;
       overflow-y: auto;
       animation: fadeIn 0.4s ease;
-      scrollbar-width: none;        /* Firefox */
-      -ms-overflow-style: none;     /* IE & Edge */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
 
     .card::-webkit-scrollbar {
-      display: none;                /* Chrome, Safari */
+      display: none;
     }
 
     h1 {
@@ -129,96 +128,13 @@
       display: block;
     }
 
-    .custom-btn {
-      background: #2a2a2a;
-      color: #ffffff;
-      padding: 8px 18px;
-      font-size: 0.85rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .custom-btn:hover {
-      background: #333;
-      transform: translateY(-1px);
-    }
-
-    .custom-btn:active {
-      transform: scale(0.96);
-    }
-
-
-    .card-container {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .card.mini {
-      max-width: 280px;
-      padding: 1.2rem;
-      border-width: 2px;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e1e1e;
-      color: #f9d71c;
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      border: 1px solid #f9d71c;
-      box-shadow: 0 0 12px rgba(249, 215, 28, 0.25);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      z-index: 9999;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(-6px);
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .emailBtn {
-      background: #f9d71c;
-      color: #000;
-      padding: 8px 18px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      border-radius: 999px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 10px rgba(249, 215, 28, 0.35);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .emailBtn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 16px rgba(249, 215, 28, 0.55);
-    }
-
-    .story-img {
-      width: 100%;
-      max-width: 300px;
+    video {
+      width: 85%;
+      max-width: 260px;
+      margin: 1rem auto 0;
+      display: block;
       border-radius: 12px;
-      object-fit: cover;
     }
-
-
-
 
     @keyframes fadeIn {
       from {
@@ -231,250 +147,101 @@
       }
     }
   </style>
-
 </head>
 
 <body>
-
-<!-- STEP 1 -->
-<div id="step1" class="card">
-  <div class="bat-icon">🦇</div>
-  <h1>Do you know it's Valentine's week?</h1>
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('success')">Yes</button>
-    <button class="noBtn" onclick="goToStep('mad')">No</button>
-  </div>
-</div>
-
-<!-- SUCCESS -->
-<div id="stepSuccess" class="card hidden">
-  <h1>Will you be my Valentine? 💛</h1>
-
-  <video class="story-img" autoplay loop muted playsinline>
-    <source src="https://raw.githubusercontent.com/balram-choudhary/digitalletter/main/qrxwxx5pj7p2x564-bhavishya/assets/success.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('fifth')">Yes</button>
-    <button class="noBtn" onclick="goToStep('third')">No</button>
-  </div>
-</div>
-
-
-<!-- MAD -->
-<div id="stepMad" class="card hidden">
-  <h1 style="color:#ff4444;">Are you mad? 😡</h1>
-  <p>You have to click on Yes!</p>
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('success')">Yes</button>
-  </div>
-</div>
-
-<!-- THIRD -->
-<div id="stepThird" class="card hidden">
-  <h1>Okay… last chance 😌</h1>
-  <img src="https://i.ibb.co/fL8t10M/1770275977684.png" alt="Third Screen">
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
-    <button class="noBtn" onclick="goToStep('fourth')">No 😭</button>
-  </div>
-</div>
-
-<!-- FOURTH -->
-<div id="stepFourth" class="card hidden">
-  <h1 style="color:#f9d71c;">This is hurting Gotham 🦇</h1>
-  <p>
-    Every time you tap <b>No</b>, the Bat-Signal fades a little more.<br>
-    Batman doesn’t cry… but tonight, even Gotham feels lonely.<br>
-    Don’t let the Dark Knight lose hope 💔
-  </p>
-  <img src="https://i.ibb.co/75XTt5Q/1770276556565.png" alt="Sad Batman">
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
-  </div>
-</div>
-
-<!-- FIFTH -->
-<div id="stepFifth" class="card hidden">
-  <h1 style="color:#f9d71c;">Welcome to Gotham 💛🦇</h1>
-  <p>
-    You’ve proven your courage, your kindness, and your heart.<br><br>
-    From this moment on, you’re not just my Valentine —<br>
-    you’re my <b>Batgirl</b>.
-  </p>
-  <img src="https://i.ibb.co/nNK0BqVB/1770277086062.png" alt="Batgirl">
-  <div class="btn-group">
-    <button class="yesBtn" onclick="goToStep('sixth')">Light the Bat-Signal 🦇</button>
-  </div>
-</div>
-
-<!-- SIXTH -->
-<div id="stepSixth" class="card hidden">
-  <div class="bat-icon">🦇</div>
-  <h1 style="color:#f9d71c;">Together, We Are Gotham</h1>
-  <p>
-    The city sleeps peacefully tonight.<br>
-    Not because darkness is gone —<br>
-    but because love stands watch. 💛
-  </p>
-  <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
-
-  <div class="btn-group" style="margin-top: 1.5rem;">
-      <button class="noBtn" onclick="goToStep('contact')">
-          Create One for Someone Special ✨
-      </button>
+  <!-- STEP 1 -->
+  <div id="step1" class="card">
+    <div class="bat-icon">🦇</div>
+    <h1>Do you know it's Valentine's week?</h1>
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('success')">Yes</button>
+      <button class="noBtn" onclick="goToStep('mad')">No</button>
+    </div>
   </div>
 
-  <p style="font-size:0.75rem; opacity:0.6; margin-top:0.4rem;">
-      Handcrafted with care
-  </p>
-</div>
-
-<div id="stepContact" class="card hidden">
-    <div class="card-container">
-      <!-- Copy Link Card -->
-      <div class="card mini">
-        <div class="bat-icon">🔗</div>
-
-        <h1 style="font-size:1.1rem;">Share This Story</h1>
-
-        <p style="font-size:0.85rem; opacity:0.8;">
-          Send this story to someone who needs
-          a little smile today.
-        </p>
-
-        <div class="btn-group">
-          <button class="yesBtn" onclick="copyStoryLink()">
-            Copy Link
-          </button>
-        </div>
-
-        <p style="font-size:0.7rem; opacity:0.6; margin-top:0.6rem;">
-          Simple. Instant. No sign-ups.
-        </p>
-      </div>
-
-
-
-
-      <!-- Paid Card -->
-      <div class="card mini">
-        <div class="bat-icon">💛</div>
-
-        <h1 style="font-size:1.1rem;">Custom Story</h1>
-
-        <p style="font-size:1.3rem; font-weight:bold; color:#f9d71c;">
-          ₹500
-        </p>
-
-       <div class="btn-group">
-        <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=studiomogliinc@gmail.com&su=Custom%20Love%20Story&body=Hi,%0AI%20want%20to%20create%20a%20custom%20love%20story."
-          target="_blank"
-          class="emailBtn"
-        >
-          Email Me ✉️
-        </a>
-      </div>
-
-      <p style="font-size:0.75rem; opacity:0.6; margin-top:0.6rem;">
-        Or email me at  
-        <span 
-          style="color:#f9d71c; cursor:pointer;"
-          onclick="copyEmail()"
-        >
-          studiomogliinc@gmail.com
-        </span>
-      </p>
-
-
-
-
-
-
-
-        <p style="font-size:0.85rem; opacity:0.8; line-height:1.5;">
-          A fully personalized story with:
-          <br>• Names
-          <br>• Custom theme
-          <br>• Your photos
-        </p>
-
-        <p style="font-size:0.7rem; opacity:0.6; margin-top:0.6rem;">
-          Made just for your person.
-        </p>
-      </div>
+  <!-- SUCCESS -->
+  <div id="stepSuccess" class="card hidden">
+    <h1>Will you be my Valentine? 💛</h1>
+    <video class="story-img" autoplay loop muted playsinline>
+      <source src="https://raw.githubusercontent.com/balram-choudhary/digitalletter/main/qrxwxx5pj7p2x564-bhavishya/assets/success.mp4" type="video/mp4">
+    </video>
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('fifth')">Yes</button>
+      <button class="noBtn" onclick="goToStep('third')">No</button>
+    </div>
   </div>
-</div>
 
+  <!-- MAD -->
+  <div id="stepMad" class="card hidden">
+    <h1 style="color:#ff4444;">Are you mad? 😡</h1>
+    <p>You have to click on Yes!</p>
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('success')">Yes</button>
+    </div>
+  </div>
 
+  <!-- THIRD -->
+  <div id="stepThird" class="card hidden">
+    <h1>Okay… last chance 😌</h1>
+    <img src="https://i.ibb.co/fL8t10M/1770275977684.png" alt="Third Screen">
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
+      <button class="noBtn" onclick="goToStep('fourth')">No 😭</button>
+    </div>
+  </div>
 
+  <!-- FOURTH -->
+  <div id="stepFourth" class="card hidden">
+    <h1 style="color:#f9d71c;">This is hurting Gotham 🦇</h1>
+    <p>
+      Every time you tap <b>No</b>, the Bat-Signal fades a little more.<br>
+      Batman doesn’t cry… but tonight, even Gotham feels lonely.<br>
+      Don’t let the Dark Knight lose hope 💔
+    </p>
+    <img src="https://i.ibb.co/75XTt5Q/1770276556565.png" alt="Sad Batman">
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('fifth')">Yes 💛</button>
+    </div>
+  </div>
 
-<script>
-  function goToStep(step) {
-    const steps = [
-      'step1',
-      'stepMad',
-      'stepSuccess',
-      'stepThird',
-      'stepFourth',
-      'stepFifth',
-      'stepSixth',
-      'stepContact'
-    ];
+  <!-- FIFTH -->
+  <div id="stepFifth" class="card hidden">
+    <h1 style="color:#f9d71c;">Welcome to Gotham 💛🦇</h1>
+    <p>
+      You’ve proven your courage, your kindness, and your heart.<br><br>
+      From this moment on, you’re not just my Valentine —<br>
+      you’re my <b>Batgirl</b>.
+    </p>
+    <img src="https://i.ibb.co/nNK0BqVB/1770277086062.png" alt="Batgirl">
+    <div class="btn-group">
+      <button class="yesBtn" onclick="goToStep('sixth')">Light the Bat-Signal 🦇</button>
+    </div>
+  </div>
 
-    // Hide all steps
-    steps.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
-    });
+  <!-- SIXTH -->
+  <div id="stepSixth" class="card hidden">
+    <div class="bat-icon">🦇</div>
+    <h1 style="color:#f9d71c;">Together, We Are Gotham</h1>
+    <p>
+      The city sleeps peacefully tonight.<br>
+      Not because darkness is gone —<br>
+      but because love stands watch. 💛
+    </p>
+    <img src="https://i.ibb.co/YBh6pvvb/1770278221039.png" alt="Final Gotham">
+  </div>
 
-    // Show requested step
-    if (step === 'success') document.getElementById('stepSuccess').classList.remove('hidden');
-    else if (step === 'mad') document.getElementById('stepMad').classList.remove('hidden');
-    else if (step === 'third') document.getElementById('stepThird').classList.remove('hidden');
-    else if (step === 'fourth') document.getElementById('stepFourth').classList.remove('hidden');
-    else if (step === 'fifth') document.getElementById('stepFifth').classList.remove('hidden');
-    else if (step === 'sixth') document.getElementById('stepSixth').classList.remove('hidden');
-    else if (step === 'contact') document.getElementById('stepContact').classList.remove('hidden');
-  }
-  function copyStoryLink() {
-    navigator.clipboard.writeText(window.location.href);
-
-    const toast = document.getElementById('toast');
-    toast.classList.remove('hidden');
-    toast.classList.add('show');
-
-    setTimeout(() => {
-      toast.classList.remove('show');
-      toast.classList.add('hidden');
-    }, 1000); // ~1.0 seconds
-  }
-
-  function copyEmail() {
-    navigator.clipboard.writeText('studiomogliinc@gmail.com');
-
-    const toast = document.getElementById('toast');
-    toast.textContent = 'Email copied ✨'; // change message dynamically
-    toast.classList.remove('hidden');
-    toast.classList.add('show');
-
-    setTimeout(() => {
-      toast.classList.remove('show');
-      toast.classList.add('hidden');
-      toast.textContent = 'Link copied ✨'; // reset for link button
-    }, 2300);
-  }
-</script>
-
-<!-- Toast -->
-<div id="toast" class="toast hidden">
-  Link copied ✨
-</div>
-
-
+  <script>
+    function goToStep(step) {
+      const steps = ['step1', 'stepMad', 'stepSuccess', 'stepThird', 'stepFourth', 'stepFifth', 'stepSixth'];
+      steps.forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(step === 'success' ? 'stepSuccess' :
+                              step === 'mad' ? 'stepMad' :
+                              step === 'third' ? 'stepThird' :
+                              step === 'fourth' ? 'stepFourth' :
+                              step === 'fifth' ? 'stepFifth' :
+                              'stepSixth').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
-
-
