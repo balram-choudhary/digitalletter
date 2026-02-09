@@ -182,45 +182,6 @@
       50% { opacity: 0.6; }
     }
 
-    /* Personalization input */
-    .personalize {
-      margin-top: 20px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .personalize.active {
-      opacity: 1;
-    }
-
-    input {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 1rem;
-      width: 100%;
-      max-width: 300px;
-      text-align: center;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    /* Final shareable scene */
-    .final-scene {
-      text-align: center;
-    }
-
-    .final-scene img {
-      max-width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .overlay {
@@ -252,6 +213,7 @@
   <audio id="ambient-sound" loop>
     <source src="https://assets.mixkit.co/sfx/preview/mixkit-rain-on-a-window-1128.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
+  </style>
   </audio>
 
   <!-- Scene 1: Entry -->
@@ -372,10 +334,6 @@
     <div class="rain" id="rain10"></div>
     <div class="overlay">
       <div class="typed-text" id="text9"></div>
-      <div class="personalize" id="personalize">
-        <input type="text" id="name-input" placeholder="Your name or a message..." />
-        <button onclick="personalizeScene()">Create your Valentine</button>
-      </div>
       <div class="buttons">
         <button onclick="next('s10')">Stay a little longer</button>
       </div>
@@ -386,12 +344,8 @@
   <div class="scene" id="s10" style="background-image: url('https://images.openai.com/static-rsc-3/cRaAwxF25692LVsrNUQqQvlIpCzvZEa-3FqXXGznT2olT_RNC2GFs46b9EHNieW-hvyIRlQec7MGKvCNPaQ-J0kaZO0SP6DQX33yE4gaDbU?purpose=fullsize\&v=1');">
     <div class="city-lights"></div>
     <div class="rain" id="rain11"></div>
-    <div class="overlay final-scene">
+    <div class="overlay">
       <div class="typed-text" id="text10"></div>
-      <img id="final-image" style="display: none; margin-top: 20px;" />
-      <div class="buttons">
-        <button onclick="saveMoment()">Save this moment</button>
-      </div>
     </div>
   </div>
 
@@ -406,7 +360,7 @@
       const rainContainer = document.getElementById(sceneId);
       rainContainer.innerHTML = "";
 
-      for (let i = 0; i < intensity; i++) {
+      for (let i = 0; c < intensity; i++) {
         const drop = document.createElement('div');
         drop.classList.add('raindrop');
         drop.style.left = `${Math.random() * 100}vw`;
@@ -468,64 +422,7 @@
       // Start typing for the new scene
       const textElement = document.getElementById(`text${sceneId.slice(1)}`);
       textElement.innerHTML = '';
-      typeWriter(sceneTexts[`text${sceneId.slice(1)}`], textElement, () => {
-        if (sceneId === 's9') {
-          document.getElementById('personalize').classList.add('active');
-        }
-      });
-
-      // Show final image if available
-      if (sceneId === 's10' && localStorage.getItem('valentineImage')) {
-        document.getElementById('final-image').src = localStorage.getItem('valentineImage');
-        document.getElementById('final-image').style.display = 'block';
-      }
-    }
-
-    // Personalize the final scene
-    function personalizeScene() {
-      const name = document.getElementById('name-input').value || "you";
-      const canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = 600;
-      const ctx = canvas.getContext('2d');
-
-      // Draw a simple heart with a message
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw heart
-      ctx.fillStyle = '#ff6b6b';
-      ctx.beginPath();
-      ctx.moveTo(400, 200);
-      ctx.bezierCurveTo(300, 100, 200, 200, 200, 300);
-      ctx.bezierCurveTo(200, 400, 300, 500, 400, 550);
-      ctx.bezierCurveTo(500, 500, 600, 400, 600, 300);
-      ctx.bezierCurveTo(600, 200, 500, 100, 400, 200);
-      ctx.fill();
-
-      // Add personalized text
-      ctx.fillStyle = '#fff';
-      ctx.font = '24px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`Happy Valentine’s, ${name}`, 400, 500);
-      ctx.fillText("This moment is ours.", 400, 530);
-
-      // Save and display
-      const image = canvas.toDataURL('image/png');
-      localStorage.setItem('valentineImage', image);
-      next('s10');
-    }
-
-    // Save the moment
-    function saveMoment() {
-      const image = localStorage.getItem('valentineImage');
-      if (image) {
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = 'our-valentine-moment.png';
-        link.click();
-        alert("Your moment has been saved. Thank you for being here.");
-      }
+      typeWriter(sceneTexts[`text${sceneId.slice(1)}`], textElement);
     }
 
     // Start the experience
