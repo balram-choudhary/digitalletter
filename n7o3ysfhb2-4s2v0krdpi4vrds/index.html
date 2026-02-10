@@ -270,8 +270,8 @@ audio {
 <body>
 
 <!-- Background music -->
-<audio id="bgm" loop preload="auto">
-  <source src="music/romantic-ambient.mp3" type="audio/mpeg">
+<audio id="bgMusic" loop preload="auto">
+    <source src="music/romantic-ambient.mp3" type="audio/mpeg">
 </audio>
 
 <!-- SCENE 1 (active by default) -->
@@ -284,7 +284,7 @@ audio {
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button onclick="next('s2')">Stay with me</button>
+      <button onclick="startMusicAndNext('s2')">Stay with me</button>
     </div>
   </div>
 </div>
@@ -502,7 +502,6 @@ const sceneText = {
   ]
 };
 
-
 let typingTimeout;
 let fadeRAF = null;
 let audioUnlocked = false;
@@ -511,9 +510,7 @@ let wasPlayingBeforeHide = false;
 let musicStarted = false;
 let pauseTimeout = null;
 
-
 let currentSceneId = 's1';
-
 
 let typingState = {
   sceneId: 's1',
@@ -522,84 +519,88 @@ let typingState = {
   active: false
 };
 
-
-const bgm = document.getElementById('bgm');
-bgm.volume = 0;
-
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0;
 
 const finalOverlay = document.getElementById('finalOverlay');
-
 
 /* ===== VOLUME FADE ===== */
 function fadeVolume(target, duration = 2600) {
   if (fadeRAF) cancelAnimationFrame(fadeRAF);
   if (pauseTimeout) clearTimeout(pauseTimeout);
 
-  const start = bgm.volume;
+  const start = bgMusic.volume;
   const startTime = performance.now();
 
   function step(now) {
     const elapsed = now - startTime;
     const p = Math.min(elapsed / duration, 1);
-    // Emotionally correct ease-out curve
     const eased = 1 - Math.pow(1 - p, 3);
-    bgm.volume = start + (target - start) * eased;
+    bgMusic.volume = start + (target - start) * eased;
 
     if (p < 1) {
       fadeRAF = requestAnimationFrame(step);
     } else {
       fadeRAF = null;
-      // Never fade to absolute zero; use near-silence (0.03)
-      if (target <= 0.03 && !bgm.paused) {
+      if (target <= 0.03 && !bgMusic.paused) {
         pauseTimeout = setTimeout(() => {
-          bgm.pause();
-        }, 300); // Slightly longer tail for emotional release
+          bgMusic.pause();
+        }, 300);
       }
     }
   }
   fadeRAF = requestAnimationFrame(step);
 }
 
-
-
 /* ===== MUSIC CONTROL ===== */
+function startMusicAndNext(id) {
+  if (!audioUnlocked) {
+    audioUnlocked = true;
+    bgMusic.play()
+      .then(() => {
+        fadeVolume(0.25, 3200);
+        next(id);
+      })
+      .catch(error => {
+        console.log('Audio play failed, waiting for user interaction:', error);
+        next(id);
+      });
+  } else {
+    next(id);
+  }
+}
+
 function startMusicSoft() {
   if (!audioUnlocked || currentSceneId === 's1') return;
 
-
   if (pauseTimeout) clearTimeout(pauseTimeout);
 
-
-  if (bgm.paused) {
-    bgm.volume = 0;
-
+  if (bgMusic.paused) {
+    bgMusic.volume = 0;
 
     if (!musicStarted) {
       musicStarted = true;
-      bgm.play()
+      bgMusic.play()
         .then(() => fadeVolume(0.25, 3200))
         .catch(() => {});
     } else {
-      bgm.play()
+      bgMusic.play()
         .then(() => fadeVolume(0.25, 2200))
         .catch(() => {});
     }
   }
 }
 
-
 function stopMusicSoft() {
-  if (!bgm.paused) {
+  if (!bgMusic.paused) {
     fadeVolume(0, 2200);
   }
 }
-
 
 /* ===== TYPEWRITER ===== */
 function typeLines(lines, container, callback, resume = false) {
   const lineEls = container.querySelectorAll('.line');
   const cursor = container.querySelector('.cursor');
-
 
   if (!resume) {
     lineEls.forEach(l => l.textContent = "");
@@ -607,14 +608,11 @@ function typeLines(lines, container, callback, resume = false) {
     typingState.charIndex = 0;
   }
 
-
   typingState.active = true;
   cursor.classList.remove('hidden');
 
-
   function step() {
     if (!typingState.active) return;
-
 
     const { lineIndex, charIndex } = typingState;
     if (lineIndex >= lines.length) {
@@ -624,19 +622,15 @@ function typeLines(lines, container, callback, resume = false) {
       return;
     }
 
-
     const line = lines[lineIndex];
     const el = lineEls[lineIndex];
-
 
     if (charIndex < line.length) {
       el.textContent += line[charIndex];
       typingState.charIndex++;
 
-
       let delay = 65 + Math.random() * 40;
       if (['.', '…', ','].includes(line[charIndex])) delay += 250;
-
 
       typingTimeout = setTimeout(step, delay);
     } else {
@@ -646,52 +640,42 @@ function typeLines(lines, container, callback, resume = false) {
     }
   }
 
-
   step();
 }
-
 
 /* ===== SCENE NAV ===== */
 function next(id) {
   clearTimeout(typingTimeout);
 
-
   currentSceneId = id;
   typingState.sceneId = id;
   typingState.active = false;
-
 
   document.querySelectorAll('.scene').forEach(s => {
     s.classList.remove('active');
     s.querySelector('.buttons')?.classList.remove('show');
   });
 
-
   const scene = document.getElementById(id);
   scene.classList.add('active');
-
 
   if (audioUnlocked && id === 's2' && !musicStarted) {
     startMusicSoft();
   }
-
 
   typeLines(sceneText[id], scene.querySelector('.text'), () => {
     scene.querySelector('.buttons').classList.add('show');
   });
 }
 
-
 /* ===== TAP ANYWHERE ===== */
 document.addEventListener('click', (e) => {
   if (e.target.tagName === 'BUTTON') return;
-
 
   if (waitingForResumeTap) {
     waitingForResumeTap = false;
     document.body.classList.remove('paused');
     document.querySelector('.resume-hint')?.remove();
-
 
     const scene = document.getElementById(typingState.sceneId);
     typeLines(
@@ -701,14 +685,12 @@ document.addEventListener('click', (e) => {
       true
     );
 
-
     if (currentSceneId !== 's1' && musicStarted) {
       startMusicSoft();
     }
     return;
   }
 });
-
 
 /* ===== BUTTON CLICK HANDLER ===== */
 document.addEventListener('click', (e) => {
@@ -719,7 +701,6 @@ document.addEventListener('click', (e) => {
       return false;
     }
 
-
     const buttonsContainer = e.target.closest('.buttons');
     if (!buttonsContainer || !buttonsContainer.classList.contains('show')) {
       e.preventDefault();
@@ -729,13 +710,11 @@ document.addEventListener('click', (e) => {
   }
 }, true);
 
-
 /* ===== INITIAL SCENE ===== */
 const firstScene = document.getElementById('s1');
 typeLines(sceneText.s1, firstScene.querySelector('.text'), () => {
   firstScene.querySelector('.buttons').classList.add('show');
 });
-
 
 /* ===== AUDIO UNLOCK ===== */
 ['click','touchstart','keydown'].forEach(evt => {
@@ -744,15 +723,13 @@ typeLines(sceneText.s1, firstScene.querySelector('.text'), () => {
   }, { once:true });
 });
 
-
 /* ===== VISIBILITY ===== */
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     typingState.active = false;
     document.body.classList.add('paused');
 
-
-    if (!bgm.paused && currentSceneId !== 's1') {
+    if (!bgMusic.paused && currentSceneId !== 's1') {
       wasPlayingBeforeHide = true;
       stopMusicSoft();
     }
@@ -761,7 +738,6 @@ document.addEventListener('visibilitychange', () => {
     showResumeHint();
   }
 });
-
 
 /* ===== HINT ===== */
 function showResumeHint() {
@@ -773,38 +749,25 @@ function showResumeHint() {
   setTimeout(() => h.remove(), 5000);
 }
 
-
 /* ===== EXIT ===== */
 window.addEventListener('pagehide', stopMusicSoft);
 window.addEventListener('beforeunload', stopMusicSoft);
 
-
 /* ===== FINAL VALENTINE MOMENT ===== */
 function showFinalValentine() {
-  // Freeze interaction & soften visuals
   document.body.classList.add('paused');
-
-
-  // Fade music gently over 5 seconds
   fadeVolume(0, 5000);
 
-
-  // Stop music exactly after fade completes
   setTimeout(() => {
-    bgm.pause();
-    bgm.currentTime = 0;
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
   }, 5000);
 
-
-  // Show final overlay after a short breath
   setTimeout(() => {
     finalOverlay.classList.add('show');
   }, 1200);
 }
-
-
 </script>
-
 
 </body>
 </html>
