@@ -630,14 +630,17 @@ let waitingForResume = false;
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    // Page hidden
+    // Page hidden - stop typing and audio
+    typingState.active = false;
+    clearTimeout(typingTimeout);
+    
     if (audioState.isPlaying) {
       pauseMusic();
-      document.body.classList.add('paused');
     }
+    document.body.classList.add('paused');
   } else {
     // Page visible
-    if (audioState.shouldBePlaying) {
+    if (audioState.shouldBePlaying || typingState.lineIndex > 0) {
       waitingForResume = true;
       showResumeHint();
     }
@@ -650,7 +653,7 @@ function showResumeHint() {
 
   const hint = document.createElement('div');
   hint.className = 'resume-hint';
-  hint.textContent = "Tap anywhere to continue";
+  hint.textContent = "Tap anywhere to continue the moment";
   document.body.appendChild(hint);
   setTimeout(() => hint.remove(), 5000);
 }
@@ -664,6 +667,17 @@ document.addEventListener('click', (e) => {
     document.body.classList.remove('paused');
     const hint = document.querySelector('.resume-hint');
     if (hint) hint.remove();
+
+    // Resume typing if it was active
+    if (typingState.lineIndex > 0) {
+      const scene = document.getElementById(typingState.sceneId);
+      typeLines(
+        sceneText[typingState.sceneId],
+        scene.querySelector('.text'),
+        () => scene.querySelector('.buttons').classList.add('show'),
+        true
+      );
+    }
 
     // Resume music if needed
     if (audioState.shouldBePlaying && !audioState.isPlaying) {
