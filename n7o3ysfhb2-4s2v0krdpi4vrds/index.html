@@ -299,40 +299,25 @@ audio {
       <div class="line"></div>
       <div class="line"></div>
       <div class="line"></div>
-      <div class="line"></div>
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button class="primary" onclick="next('s3a')">I like quiet</button>
-      <button class="secondary" onclick="next('s3b')">I'm tired of noise</button>
+      <button onclick="next('s3')">Continue</button>
     </div>
   </div>
 </div>
 
-<!-- SCENE 3A -->
-<div class="scene" id="s3a" style="background-image:url('images/3-window.jpg')">
+<!-- SCENE 3 -->
+<div class="scene" id="s3" style="background-image:url('images/3-window.jpg')">
   <div class="overlay">
     <div class="text" data-lines>
+      <div class="line"></div>
       <div class="line"></div>
       <div class="line"></div>
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button onclick="next('s4')">Look at the city</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCENE 3B -->
-<div class="scene" id="s3b" style="background-image:url('images/3-window.jpg')">
-  <div class="overlay">
-    <div class="text" data-lines>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="cursor"></div>
-    </div>
-    <div class="buttons">
-      <button onclick="next('s4')">Look at the city</button>
+      <button onclick="next('s4')">Continue</button>
     </div>
   </div>
 </div>
@@ -343,14 +328,10 @@ audio {
     <div class="text" data-lines>
       <div class="line"></div>
       <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button class="primary" onclick="next('s5')">That feels right</button>
-      <button class="secondary" onclick="next('s5')">That feels intimate</button>
+      <button onclick="next('s5')">Continue</button>
     </div>
   </div>
 </div>
@@ -366,8 +347,7 @@ audio {
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button class="primary" onclick="next('s6')">I'm here</button>
-      <button class="secondary" onclick="next('s6')">I didn't expect this</button>
+      <button onclick="next('s6')">Continue</button>
     </div>
   </div>
 </div>
@@ -381,49 +361,13 @@ audio {
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button onclick="next('s7')">Stay</button>
+      <button onclick="next('s7')">Continue</button>
     </div>
   </div>
 </div>
 
-<!-- SCENE 7 -->
-<div class="scene" id="s7" style="
-  background-image:url('images/7-skyline.jpg');
-  justify-content:flex-start;
-  padding-left:8vw;">
-  <div class="overlay">
-    <div class="text" data-lines>
-      <div class="line"></div>
-      <div class="cursor"></div>
-    </div>
-    <div class="buttons">
-      <button class="primary" onclick="next('s8')">Yes</button>
-      <button class="secondary" onclick="next('s8')">Just hold this moment</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCENE 8 -->
-<div class="scene" id="s8" style="
-  background-image:url('images/8-couple.jpg');
-  background-position:center right;">
-  <div class="overlay">
-    <div class="text" data-lines>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="cursor"></div>
-    </div>
-    <div class="buttons">
-      <button onclick="next('s9')">Continue</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCENE 9 -->
-<div class="scene" id="s9" style="background-image:url('images/9-heart.jpg')">
+<!-- SCENE 7 (FINAL) -->
+<div class="scene" id="s7" style="background-image:url('images/7-skyline.jpg')">
   <div class="overlay">
     <div class="text" data-lines>
       <div class="line"></div>
@@ -431,23 +375,7 @@ audio {
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button onclick="next('s10')">Stay a little longer</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCENE 10 -->
-<div class="scene" id="s10" style="background-image:url('images/10-dawn.jpg')">
-  <div class="overlay">
-    <div class="text" data-lines>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="cursor"></div>
-    </div>
-    <div class="buttons">
-      <button onclick="showFinalValentine()">Create your Valentine</button>
+      <button onclick="showFinalValentine()">Stay with this moment</button>
     </div>
   </div>
 </div>
@@ -455,7 +383,7 @@ audio {
 <!-- FINAL VALENTINE OVERLAY -->
 <div id="finalOverlay" class="final-overlay">
   <div class="final-message">
-    This Valentine is yours.
+    You stayed. That means everything.
   </div>
 </div>
 
@@ -467,41 +395,32 @@ const sceneText = {
     "But it feels different."
   ],
   s2: [
-    "Most people celebrate loudly tonight.",
-    "Reservations. Noise. Crowds.",
-    "But some moments…",
-    "are meant to be quiet."
+    "I never liked how loud tonight feels.",
+    "It never really felt like mine.",
+    "Until now."
   ],
-  s3a: ["Me too.", "Quiet lets you feel things properly."],
-  s3b: ["Yeah…", "Love doesn't need an audience."],
+  s3: [
+    "I don't need noise.",
+    "I don't need big gestures.",
+    "I just need you here."
+  ],
   s4: [
-    "Every light is someone loving someone.",
-    "In their own way.",
-    "Some loud.",
-    "Some soft.",
-    "Ours is soft."
+    "I wasn't looking for something loud.",
+    "I was looking for something real."
   ],
   s5: [
-    "Valentine's usually asks for big words.",
-    "Big gestures.",
-    "But tonight…",
-    "I just wanted you here."
+    "Sometimes I get scared.",
+    "Scared this won't last.",
+    "But tonight,",
+    "I don't want to be afraid."
   ],
-  s6: ["You staying…", "means more than you think."],
-  s7: ["Can I make this night ours?"],
-  s8: [
-    "So let's do this quietly.",
-    "No promises shouted.",
-    "Just you.",
-    "And me.",
-    "And the city."
+  s6: [
+    "If you're still here…",
+    "that means more than you know."
   ],
-  s9: ["Happy Valentine's.", "Thank you for choosing to be here."],
-  s10: [
-    "The night will pass.",
-    "The city will wake.",
-    "But this…",
-    "this stays."
+  s7: [
+    "Thank you for staying.",
+    "That's enough for me."
   ]
 };
 
@@ -730,14 +649,38 @@ function typeLines(lines, container, callback, resume = false) {
       el.textContent += line[charIndex];
       typingState.charIndex++;
 
-      let delay = 65 + Math.random() * 40;
+      // Adjust speed based on scene for emotional arc
+      let baseDelay = 65;
+      let randomness = 40;
+      
+      if (currentSceneId === 's1') {
+        // Opening: slow
+        baseDelay = 80;
+        randomness = 45;
+      } else if (currentSceneId === 's5') {
+        // Vulnerability peak: slower
+        baseDelay = 90;
+        randomness = 50;
+      } else if (currentSceneId === 's6' || currentSceneId === 's7') {
+        // Final scenes: slowest
+        baseDelay = 100;
+        randomness = 55;
+      }
+      
+      let delay = baseDelay + Math.random() * randomness;
       if (['.', '…', ','].includes(line[charIndex])) delay += 250;
 
       typingTimeout = setTimeout(step, delay);
     } else {
       typingState.lineIndex++;
       typingState.charIndex = 0;
-      typingTimeout = setTimeout(step, 650);
+      
+      // Longer pauses between lines for vulnerable/final scenes
+      let linePause = 650;
+      if (currentSceneId === 's5') linePause = 800;
+      if (currentSceneId === 's6' || currentSceneId === 's7') linePause = 900;
+      
+      typingTimeout = setTimeout(step, linePause);
     }
   }
 
@@ -769,6 +712,13 @@ function next(id) {
 
   const scene = document.getElementById(id);
   scene.classList.add('active');
+
+  // Slightly raise volume for vulnerability scene (s5)
+  if (id === 's5' && audioState.isPlaying) {
+    fadeTo(0.30, 1500);
+  } else if (audioState.isPlaying && audioState.targetVolume !== 0.25) {
+    fadeTo(0.25, 1500);
+  }
 
   typeLines(sceneText[id], scene.querySelector('.text'), () => {
     scene.querySelector('.buttons').classList.add('show');
