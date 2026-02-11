@@ -272,8 +272,8 @@ audio {
 
 <body>
 
-<!-- Background music -->
-<audio id="bgMusic" loop preload="auto">
+<!-- Background music - Oppo-optimized -->
+<audio id="bgMusic" loop preload="metadata">
     <source src="music/romantic-ambient.mp3" type="audio/mpeg">
 </audio>
 
@@ -304,7 +304,7 @@ audio {
     </div>
     <div class="buttons">
       <button class="primary" onclick="next('s3a')">I like quiet</button>
-      <button class="secondary" onclick="next('s3b')">I’m tired of noise</button>
+      <button class="secondary" onclick="next('s3b')">I'm tired of noise</button>
     </div>
   </div>
 </div>
@@ -366,8 +366,8 @@ audio {
       <div class="cursor"></div>
     </div>
     <div class="buttons">
-      <button class="primary" onclick="next('s6')">I’m here</button>
-      <button class="secondary" onclick="next('s6')">I didn’t expect this</button>
+      <button class="primary" onclick="next('s6')">I'm here</button>
+      <button class="secondary" onclick="next('s6')">I didn't expect this</button>
     </div>
   </div>
 </div>
@@ -505,14 +505,11 @@ const sceneText = {
   ]
 };
 
-let typingTimeout;
-let fadeRAF = null;
-let audioUnlocked = false;
-let waitingForResumeTap = false;
-let wasPlayingBeforeHide = false;
-let musicStarted = false;
-let pauseTimeout = null;
+/* ========================================
+   ULTRA-MINIMAL AUDIO SYSTEM (Oppo-safe)
+   ======================================== */
 
+let typingTimeout;
 let currentSceneId = 's1';
 
 let typingState = {
@@ -523,84 +520,166 @@ let typingState = {
 };
 
 const bgMusic = document.getElementById('bgMusic');
-bgMusic.volume = 0;
-
 const finalOverlay = document.getElementById('finalOverlay');
 
-/* ===== VOLUME FADE ===== */
-function fadeVolume(target, duration = 2600) {
-  if (fadeRAF) cancelAnimationFrame(fadeRAF);
-  if (pauseTimeout) clearTimeout(pauseTimeout);
+// Minimal audio state
+const audioState = {
+  isPlaying: false,
+  shouldBePlaying: false,
+  targetVolume: 0.25,
+  fadeFrame: null
+};
 
-  const start = bgMusic.volume;
-  const startTime = performance.now();
+// Initialize
+bgMusic.volume = 0;
+
+/**
+ * Start music playback - Oppo-safe version
+ * CRITICAL: Must be called DIRECTLY in click handler
+ */
+function startMusic() {
+  console.log('[AUDIO] startMusic() called');
+
+  if (!bgMusic.paused) {
+    console.log('[AUDIO] Already playing');
+    return;
+  }
+
+  // Oppo fix: Set tiny volume BEFORE play
+  bgMusic.volume = 0.01;
+
+  // CRITICAL: Call play() IMMEDIATELY, no async before this
+  const playPromise = bgMusic.play();
+
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        console.log('[AUDIO] play() succeeded');
+        audioState.isPlaying = true;
+        audioState.shouldBePlaying = true;
+        // Fade up AFTER play succeeds
+        fadeTo(audioState.targetVolume, 2500);
+      })
+      .catch(err => {
+        console.error('[AUDIO] play() failed:', err);
+        audioState.isPlaying = false;
+        audioState.shouldBePlaying = false;
+      });
+  }
+}
+
+/**
+ * Fade volume to target
+ */
+function fadeTo(target, duration, callback = null) {
+  if (audioState.fadeFrame) {
+    cancelAnimationFrame(audioState.fadeFrame);
+  }
+
+  const start = performance.now();
+  const startVol = bgMusic.volume;
 
   function step(now) {
-    const elapsed = now - startTime;
-    const p = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - p, 3);
-    bgMusic.volume = start + (target - start) * eased;
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    bgMusic.volume = startVol + (target - startVol) * progress;
 
-    if (p < 1) {
-      fadeRAF = requestAnimationFrame(step);
+    if (progress < 1) {
+      audioState.fadeFrame = requestAnimationFrame(step);
     } else {
-      fadeRAF = null;
-      if (target <= 0.03 && !bgMusic.paused) {
-        pauseTimeout = setTimeout(() => {
-          bgMusic.pause();
-        }, 300);
-      }
+      audioState.fadeFrame = null;
+      if (callback) callback();
     }
   }
-  fadeRAF = requestAnimationFrame(step);
+
+  audioState.fadeFrame = requestAnimationFrame(step);
 }
 
-/* ===== MUSIC CONTROL ===== */
-function startMusicAndNext(id) {
-  if (!audioUnlocked) {
-    audioUnlocked = true;
-    bgMusic.play()
-      .then(() => {
-        fadeVolume(0.25, 3200);
-        next(id);
-      })
-      .catch(error => {
-        console.log('Audio play failed, waiting for user interaction:', error);
-        next(id);
-      });
+/**
+ * Pause immediately (for backgrounding)
+ */
+function pauseMusic() {
+  console.log('[AUDIO] pauseMusic()');
+  if (audioState.fadeFrame) {
+    cancelAnimationFrame(audioState.fadeFrame);
+    audioState.fadeFrame = null;
+  }
+  bgMusic.pause();
+  audioState.isPlaying = false;
+}
+
+/**
+ * Reset audio (for final scene)
+ */
+function resetAudio() {
+  if (audioState.fadeFrame) {
+    cancelAnimationFrame(audioState.fadeFrame);
+  }
+  bgMusic.pause();
+  bgMusic.currentTime = 0;
+  bgMusic.volume = 0;
+  audioState.isPlaying = false;
+  audioState.shouldBePlaying = false;
+}
+
+/* ========================================
+   VISIBILITY HANDLING (Simplified)
+   ======================================== */
+
+let waitingForResume = false;
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Page hidden
+    if (audioState.isPlaying) {
+      pauseMusic();
+      document.body.classList.add('paused');
+    }
   } else {
-    next(id);
-  }
-}
-
-function startMusicSoft() {
-  if (!audioUnlocked || currentSceneId === 's1') return;
-
-  if (pauseTimeout) clearTimeout(pauseTimeout);
-
-  if (bgMusic.paused) {
-    bgMusic.volume = 0;
-
-    if (!musicStarted) {
-      musicStarted = true;
-      bgMusic.play()
-        .then(() => fadeVolume(0.25, 3200))
-        .catch(() => {});
-    } else {
-      bgMusic.play()
-        .then(() => fadeVolume(0.25, 2200))
-        .catch(() => {});
+    // Page visible
+    if (audioState.shouldBePlaying) {
+      waitingForResume = true;
+      showResumeHint();
     }
   }
+});
+
+function showResumeHint() {
+  const oldHint = document.querySelector('.resume-hint');
+  if (oldHint) oldHint.remove();
+
+  const hint = document.createElement('div');
+  hint.className = 'resume-hint';
+  hint.textContent = "Tap anywhere to continue";
+  document.body.appendChild(hint);
+  setTimeout(() => hint.remove(), 5000);
 }
 
-function stopMusicSoft() {
-  if (!bgMusic.paused) {
-    fadeVolume(0, 2200);
+// Handle tap to resume
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'BUTTON') return;
+
+  if (waitingForResume) {
+    waitingForResume = false;
+    document.body.classList.remove('paused');
+    const hint = document.querySelector('.resume-hint');
+    if (hint) hint.remove();
+
+    // Resume music if needed
+    if (audioState.shouldBePlaying && !audioState.isPlaying) {
+      startMusic();
+    }
   }
-}
+});
 
-/* ===== TYPEWRITER ===== */
+// Cleanup on page close
+window.addEventListener('pagehide', () => pauseMusic());
+window.addEventListener('beforeunload', () => pauseMusic());
+
+/* ========================================
+   TYPEWRITER SYSTEM
+   ======================================== */
+
 function typeLines(lines, container, callback, resume = false) {
   const lineEls = container.querySelectorAll('.line');
   const cursor = container.querySelector('.cursor');
@@ -646,7 +725,17 @@ function typeLines(lines, container, callback, resume = false) {
   step();
 }
 
-/* ===== SCENE NAV ===== */
+/* ========================================
+   SCENE NAVIGATION
+   ======================================== */
+
+function startMusicAndNext(id) {
+  // CRITICAL: Start music synchronously in click handler
+  startMusic();
+  // Then navigate
+  next(id);
+}
+
 function next(id) {
   clearTimeout(typingTimeout);
 
@@ -662,43 +751,15 @@ function next(id) {
   const scene = document.getElementById(id);
   scene.classList.add('active');
 
-  if (audioUnlocked && id === 's2' && !musicStarted) {
-    startMusicSoft();
-  }
-
   typeLines(sceneText[id], scene.querySelector('.text'), () => {
     scene.querySelector('.buttons').classList.add('show');
   });
 }
 
-/* ===== TAP ANYWHERE ===== */
-document.addEventListener('click', (e) => {
-  if (e.target.tagName === 'BUTTON') return;
-
-  if (waitingForResumeTap) {
-    waitingForResumeTap = false;
-    document.body.classList.remove('paused');
-    document.querySelector('.resume-hint')?.remove();
-
-    const scene = document.getElementById(typingState.sceneId);
-    typeLines(
-      sceneText[typingState.sceneId],
-      scene.querySelector('.text'),
-      () => scene.querySelector('.buttons').classList.add('show'),
-      true
-    );
-
-    if (currentSceneId !== 's1' && musicStarted) {
-      startMusicSoft();
-    }
-    return;
-  }
-});
-
 /* ===== BUTTON CLICK HANDLER ===== */
 document.addEventListener('click', (e) => {
   if (e.target.tagName === 'BUTTON') {
-    if (waitingForResumeTap) {
+    if (waitingForResume) {
       e.preventDefault();
       e.stopPropagation();
       return false;
@@ -713,63 +774,31 @@ document.addEventListener('click', (e) => {
   }
 }, true);
 
-/* ===== INITIAL SCENE ===== */
+/* ===== FINAL VALENTINE MOMENT ===== */
+function showFinalValentine() {
+  document.body.classList.add('paused');
+
+  // Fade out music over 5 seconds
+  fadeTo(0, 5000, () => {
+    resetAudio();
+  });
+
+  // Show final overlay after 1.2s
+  setTimeout(() => {
+    finalOverlay.classList.add('show');
+  }, 1200);
+}
+
+/* ========================================
+   INITIALIZE
+   ======================================== */
+
+// Start first scene
 const firstScene = document.getElementById('s1');
 typeLines(sceneText.s1, firstScene.querySelector('.text'), () => {
   firstScene.querySelector('.buttons').classList.add('show');
 });
 
-/* ===== AUDIO UNLOCK ===== */
-['click','touchstart','keydown'].forEach(evt => {
-  window.addEventListener(evt, () => {
-    audioUnlocked = true;
-  }, { once:true });
-});
-
-/* ===== VISIBILITY ===== */
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    typingState.active = false;
-    document.body.classList.add('paused');
-
-    if (!bgMusic.paused && currentSceneId !== 's1') {
-      wasPlayingBeforeHide = true;
-      stopMusicSoft();
-    }
-  } else if (wasPlayingBeforeHide || typingState.active === false) {
-    waitingForResumeTap = true;
-    showResumeHint();
-  }
-});
-
-/* ===== HINT ===== */
-function showResumeHint() {
-  if (document.querySelector('.resume-hint')) return;
-  const h = document.createElement('div');
-  h.className = 'resume-hint';
-  h.textContent = "Tap anywhere to continue the moment";
-  document.body.appendChild(h);
-  setTimeout(() => h.remove(), 5000);
-}
-
-/* ===== EXIT ===== */
-window.addEventListener('pagehide', stopMusicSoft);
-window.addEventListener('beforeunload', stopMusicSoft);
-
-/* ===== FINAL VALENTINE MOMENT ===== */
-function showFinalValentine() {
-  document.body.classList.add('paused');
-  fadeVolume(0, 5000);
-
-  setTimeout(() => {
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
-  }, 5000);
-
-  setTimeout(() => {
-    finalOverlay.classList.add('show');
-  }, 1200);
-}
 </script>
 
 </body>
