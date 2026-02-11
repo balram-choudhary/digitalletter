@@ -627,10 +627,12 @@ function resetAudio() {
    ======================================== */
 
 let waitingForResume = false;
+let wasTypingBeforeHide = false;
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     // Page hidden - stop typing and audio
+    wasTypingBeforeHide = typingState.active;
     typingState.active = false;
     clearTimeout(typingTimeout);
     
@@ -639,8 +641,8 @@ document.addEventListener('visibilitychange', () => {
     }
     document.body.classList.add('paused');
   } else {
-    // Page visible
-    if (audioState.shouldBePlaying || typingState.lineIndex > 0) {
+    // Page visible - wait for tap to resume
+    if (wasTypingBeforeHide || audioState.shouldBePlaying) {
       waitingForResume = true;
       showResumeHint();
     }
@@ -668,8 +670,9 @@ document.addEventListener('click', (e) => {
     const hint = document.querySelector('.resume-hint');
     if (hint) hint.remove();
 
-    // Resume typing if it was active
-    if (typingState.lineIndex > 0) {
+    // Resume typing if it was interrupted
+    if (wasTypingBeforeHide) {
+      wasTypingBeforeHide = false;
       const scene = document.getElementById(typingState.sceneId);
       typeLines(
         sceneText[typingState.sceneId],
@@ -683,6 +686,8 @@ document.addEventListener('click', (e) => {
     if (audioState.shouldBePlaying && !audioState.isPlaying) {
       startMusic();
     }
+    
+    return;
   }
 });
 
