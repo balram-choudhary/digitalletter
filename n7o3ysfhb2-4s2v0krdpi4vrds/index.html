@@ -506,7 +506,7 @@ const sceneText = {
 };
 
 /* ========================================
-   AUDIO SYSTEM - FIXED FOR ALL DEVICES
+   STATE & INITIALIZATION
    ======================================== */
 
 let typingTimeout;
@@ -522,263 +522,455 @@ let typingState = {
 const bgMusic = document.getElementById('bgMusic');
 const finalOverlay = document.getElementById('finalOverlay');
 
-// Audio state - simplified and robust
-let audioState = {
-  unlocked: false,      // Has user interacted?
-  playing: false,       // Is music currently playing?
-  shouldPlay: false,    // Should music be playing when visible?
-  fadeFrame: null,      // Current fade animation frame
-  pauseOnHide: false    // Should we pause when hidden?
-};
-
-// Initialize audio
+// Initialize
 bgMusic.volume = 0;
 
-// CRITICAL: Unlock audio on first interaction (required for all mobile browsers)
-function unlockAudio() {
-  if (audioState.unlocked) return;
-  
-  // Try to create and resume an AudioContext (helps with Samsung)
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') {
-      ctx.resume();
-    }
-    ctx.close();
-  } catch (e) {
-    // Ignore errors - not all browsers need this
+/* ========================================
+   AUDIO STATE MACHINE
+   ======================================== */
+
+const audioState = {
+  unlocked: false,        // Has user clicked?
+  isPlaying: false,       // Is audio currently playing?
+  shouldBePlaying: false, // Should audio be playing when visible?
+  targetVolume: 0.25,     // Normal playback volume
+  fadeFrame: null,        // RequestAnimationFrame ID for fade
+
+  // Logging helper
+  log() {
+    console.log('[STATE]', JSON.stringify({
+      unlocked: this.unlocked,
+      isPlaying: this.isPlaying,
+      shouldBePlaying: this.shouldBePlaying,
+      currentVolume: bgMusic.volume.toFixed(3),
+      paused: bgMusic.paused,
+      currentTime: bgMusic.currentTime.toFixed(2)
+    }, null, 2));
   }
-  
-  audioState.unlocked = true;
+};
+
+/* ========================================
+   LOGGING UTILITIES
+   ======================================== */
+
+function logAudio(message, data = {}) {
+  console.log(`[AUDIO] ${message}`, data);
+  audioState.log();
 }
 
-// Listen for first user interaction
-['click', 'touchstart', 'touchend', 'keydown'].forEach(evt => {
-  document.addEventListener(evt, unlockAudio, { once: true });
+function logVisibility(message, data = {}) {
+  console.log(`[VISIBILITY] ${message}`, data);
+  audioState.log();
+}
+
+function logError(message, error) {
+  console.error(`[ERROR] ${message}`, error);
+  audioState.log();
+}
+
+/* ========================================
+   AUDIO UNLOCK (First User Interaction)
+   ======================================== */
+
+function unlockAudio() {
+  if (audioState.unlocked) {
+    logAudio('Already unlocked, skipping');
+    return;
+  }
+
+  logAudio('Attempting audio unlock...');
+
+  // Only try AudioContext if it might help
+  // Samsung Chrome sometimes needs this, but it can also cause issues
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      const ctx = new AudioContextClass();
+      logAudio('AudioContext created', { state: ctx.state });
+
+      if (ctx.state === 'suspended') {
+        ctx.resume().then(() => {
+          logAudio('AudioContext resumed successfully');
+        }).catch(err => {
+          logError('AudioContext resume failed', err);
+        });
+      }
+
+      // Clean up immediately to avoid conflicts
+      setTimeout(() => ctx.close(), 100);
+    }
+  } catch (e) {
+    logError('AudioContext creation failed (non-critical)', e);
+  }
+
+  audioState.unlocked = true;
+  logAudio('Audio unlocked successfully');
+}
+
+// Listen for first interaction
+['click', 'touchstart', 'touchend'].forEach(evt => {
+  document.addEventListener(evt, unlockAudio, { once: true, passive: true });
 });
 
+/* ========================================
+   FADE SYSTEM
+   ======================================== */
+
+function stopFade() {
+  if (audioState.fadeFrame) {
+    cancelAnimationFrame(audioState.fadeFrame);
+    audioState.fadeFrame = null;
+    logAudio('Fade cancelled');
+  }
+}
+
+function fadeTo(targetVolume, durationMs, onComplete = null) {
+  stopFade();
+
+  const startVolume = bgMusic.volume;
+  const startTime = performance.now();
+
+  logAudio(`Fade started: ${startVolume.toFixed(3)} → ${targetVolume.toFixed(3)}`, {
+    duration: durationMs
+  });
+
+  function animate(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / durationMs, 1);
+
+    // Ease-out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    bgMusic.volume = startVolume + (targetVolume - startVolume) * eased;
+
+    if (progress < 1) {
+      audioState.fadeFrame = requestAnimationFrame(animate);
+    } else {
+      audioState.fadeFrame = null;
+      logAudio(`Fade completed: ${bgMusic.volume.toFixed(3)}`);
+      if (onComplete) onComplete();
+    }
+  }
+
+  audioState.fadeFrame = requestAnimationFrame(animate);
+}
+
+/* ========================================
+   CORE AUDIO CONTROLS
+   ======================================== */
+
 /**
- * Start playing music with fade-in
- * CRITICAL: Must be called directly in click handler for Samsung compatibility
+ * Start music playback
+ * CRITICAL: Must be called DIRECTLY in user gesture handler
  */
-function playMusic() {
+function startMusic() {
+  logAudio('startMusic() called', {
+    unlocked: audioState.unlocked,
+    isPlaying: audioState.isPlaying,
+    paused: bgMusic.paused
+  });
+
   if (!audioState.unlocked) {
-    console.log('Audio not unlocked yet');
+    logError('Audio not unlocked - cannot start');
     return;
   }
-  
-  if (audioState.playing) {
-    console.log('Already playing');
+
+  if (audioState.isPlaying) {
+    logAudio('Already playing - ignoring');
     return;
   }
-  
-  // CRITICAL for Samsung: play() must happen synchronously in user gesture
-  // No await, no setTimeout, no Promise chains before play()
+
+  // CRITICAL: Call play() synchronously (no await, no setTimeout)
+  logAudio('Calling bgMusic.play() synchronously...');
+
   const playPromise = bgMusic.play();
-  
+
   if (playPromise !== undefined) {
     playPromise
       .then(() => {
-        audioState.playing = true;
-        audioState.shouldPlay = true;
-        audioState.pauseOnHide = true;
-        fadeMusicTo(0.25, 3000);
+        audioState.isPlaying = true;
+        audioState.shouldBePlaying = true;
+
+        logAudio('play() succeeded! Starting fade-in', {
+          currentTime: bgMusic.currentTime,
+          volume: bgMusic.volume
+        });
+
+        // Fade in to target volume
+        fadeTo(audioState.targetVolume, 3000);
       })
-      .catch(err => {
-        console.log('Playback blocked:', err);
-        audioState.playing = false;
-        audioState.shouldPlay = false;
+      .catch(error => {
+        audioState.isPlaying = false;
+        audioState.shouldBePlaying = false;
+
+        logError('play() FAILED - This is the root cause', {
+          error: error.message,
+          errorName: error.name,
+          paused: bgMusic.paused,
+          readyState: bgMusic.readyState,
+          networkState: bgMusic.networkState
+        });
+
+        // Suggest fix to user
+        console.warn('💡 TIP: Check if audio file exists at: music/romantic-ambient.mp3');
       });
+  } else {
+    logError('play() returned undefined (very old browser)');
   }
 }
 
 /**
- * Stop music with optional fade-out
- * @param {boolean} immediate - If true, stop instantly without fade
+ * Stop music with optional fade
  */
 function stopMusic(immediate = false) {
-  audioState.shouldPlay = false;
-  
+  logAudio('stopMusic() called', { immediate });
+
+  audioState.shouldBePlaying = false;
+
   if (immediate) {
     stopFade();
     bgMusic.pause();
     bgMusic.volume = 0;
-    audioState.playing = false;
+    audioState.isPlaying = false;
+    logAudio('Music stopped immediately');
   } else {
-    fadeMusicTo(0, 2000, () => {
+    fadeTo(0, 2000, () => {
       bgMusic.pause();
-      audioState.playing = false;
+      audioState.isPlaying = false;
+      logAudio('Music stopped after fade-out');
     });
   }
 }
 
 /**
- * Fade music volume to target
- * @param {number} target - Target volume (0-1)
- * @param {number} duration - Fade duration in ms
- * @param {function} callback - Called when fade completes
+ * Pause immediately (for backgrounding)
  */
-function fadeMusicTo(target, duration, callback = null) {
+function pauseMusic() {
+  logAudio('pauseMusic() called');
+
   stopFade();
-  
-  const startVolume = bgMusic.volume;
-  const startTime = performance.now();
-  
-  function animate(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    
-    // Ease-out cubic for smooth fade
-    const eased = 1 - Math.pow(1 - progress, 3);
-    bgMusic.volume = startVolume + (target - startVolume) * eased;
-    
-    if (progress < 1) {
-      audioState.fadeFrame = requestAnimationFrame(animate);
-    } else {
-      audioState.fadeFrame = null;
-      if (callback) callback();
-    }
-  }
-  
-  audioState.fadeFrame = requestAnimationFrame(animate);
+  bgMusic.pause();
+  audioState.isPlaying = false;
+
+  logAudio('Music paused immediately', {
+    shouldBePlaying: audioState.shouldBePlaying
+  });
 }
 
 /**
- * Stop any ongoing fade animation
+ * Resume playback (must be from user gesture on mobile)
  */
-function stopFade() {
-  if (audioState.fadeFrame) {
-    cancelAnimationFrame(audioState.fadeFrame);
-    audioState.fadeFrame = null;
+function resumeMusic() {
+  logAudio('resumeMusic() called', {
+    shouldBePlaying: audioState.shouldBePlaying,
+    isPlaying: audioState.isPlaying
+  });
+
+  if (!audioState.shouldBePlaying) {
+    logAudio('shouldBePlaying = false, not resuming');
+    return;
+  }
+
+  if (audioState.isPlaying) {
+    logAudio('Already playing, not resuming');
+    return;
+  }
+
+  logAudio('Attempting resume via play()...');
+
+  const playPromise = bgMusic.play();
+
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        audioState.isPlaying = true;
+        logAudio('Resume succeeded! Fading in...');
+        fadeTo(audioState.targetVolume, 2000);
+      })
+      .catch(error => {
+        logError('Resume failed', {
+          error: error.message,
+          errorName: error.name
+        });
+      });
   }
 }
 
 /**
- * Reset audio completely (for final scene)
+ * Complete reset (for ending)
  */
 function resetAudio() {
+  logAudio('resetAudio() called - full reset');
+
   stopFade();
   bgMusic.pause();
   bgMusic.currentTime = 0;
   bgMusic.volume = 0;
-  audioState.playing = false;
-  audioState.shouldPlay = false;
-  audioState.pauseOnHide = false;
+
+  audioState.isPlaying = false;
+  audioState.shouldBePlaying = false;
+
+  logAudio('Audio fully reset');
 }
 
 /* ========================================
-   VISIBILITY HANDLING - FIXED
+   VISIBILITY HANDLING
    ======================================== */
 
 let waitingForResume = false;
 
-// Handle page visibility changes (backgrounding, returning to tab)
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    // Page hidden (user pressed home or switched tabs)
-    
-    // Stop typing animation
+    // === PAGE HIDDEN (backgrounded) ===
+
+    logVisibility('Page hidden (backgrounded)', {
+      isPlaying: audioState.isPlaying,
+      shouldBePlaying: audioState.shouldBePlaying
+    });
+
+    // Stop typing
     typingState.active = false;
     clearTimeout(typingTimeout);
-    
-    // CRITICAL FIX: Pause music IMMEDIATELY (no fade delay)
-    if (audioState.playing && audioState.pauseOnHide) {
-      stopFade();
-      bgMusic.pause();
-      audioState.playing = false;
-      // Keep shouldPlay = true so we can resume
+
+    // Pause music IMMEDIATELY
+    if (audioState.isPlaying) {
+      pauseMusic();
+      logVisibility('Music paused due to backgrounding');
     }
-    
+
     document.body.classList.add('paused');
-    
+
   } else {
-    // Page visible again
-    
-    // If we were playing before, wait for user tap to resume
-    if (audioState.shouldPlay || typingState.lineIndex > 0) {
+    // === PAGE VISIBLE (foregrounded) ===
+
+    logVisibility('Page visible (foregrounded)', {
+      shouldBePlaying: audioState.shouldBePlaying,
+      isPlaying: audioState.isPlaying,
+      typingLineIndex: typingState.lineIndex
+    });
+
+    // If we should be playing or typing has started, wait for user tap
+    if (audioState.shouldBePlaying || typingState.lineIndex > 0) {
       waitingForResume = true;
       showResumeHint();
+      logVisibility('Waiting for user tap to resume');
     }
   }
 });
 
-// Show hint to tap to resume
+/* ========================================
+   RESUME HANDLING
+   ======================================== */
+
 function showResumeHint() {
-  // Remove old hint if exists
   const oldHint = document.querySelector('.resume-hint');
   if (oldHint) oldHint.remove();
-  
+
   const hint = document.createElement('div');
   hint.className = 'resume-hint';
   hint.textContent = "Tap anywhere to continue";
   document.body.appendChild(hint);
-  
-  // Auto-remove after 5 seconds
+
   setTimeout(() => hint.remove(), 5000);
+
+  logVisibility('Resume hint shown');
 }
 
-// Handle resume tap
+// Handle tap to resume
 document.addEventListener('click', (e) => {
   if (e.target.tagName === 'BUTTON') return;
-  
+
   if (waitingForResume) {
+    logVisibility('User tapped to resume');
+
     waitingForResume = false;
     document.body.classList.remove('paused');
-    
+
     // Remove hint
     const hint = document.querySelector('.resume-hint');
     if (hint) hint.remove();
-    
+
     // Resume typing
     const scene = document.getElementById(typingState.sceneId);
     typeLines(
       sceneText[typingState.sceneId],
       scene.querySelector('.text'),
       () => scene.querySelector('.buttons').classList.add('show'),
-      true  // resume = true
+      true
     );
-    
-    // Resume music if it should be playing
-    if (audioState.shouldPlay && !audioState.playing) {
-      const resumePromise = bgMusic.play();
-      if (resumePromise !== undefined) {
-        resumePromise
-          .then(() => {
-            audioState.playing = true;
-            fadeMusicTo(0.25, 2000);
-          })
-          .catch(err => {
-            console.log('Resume blocked:', err);
-          });
-      }
+
+    // Resume music if needed
+    if (audioState.shouldBePlaying && !audioState.isPlaying) {
+      logVisibility('Attempting to resume music from user tap');
+      resumeMusic();
     }
   }
 });
 
-// Prevent button clicks when waiting for resume or buttons not shown
+// Prevent button clicks when paused or buttons not ready
 document.addEventListener('click', (e) => {
   if (e.target.tagName === 'BUTTON') {
     if (waitingForResume) {
       e.preventDefault();
       e.stopPropagation();
+      logVisibility('Button click blocked - waiting for resume');
       return false;
     }
-    
+
     const buttonsContainer = e.target.closest('.buttons');
     if (!buttonsContainer || !buttonsContainer.classList.contains('show')) {
       e.preventDefault();
       e.stopPropagation();
+      logVisibility('Button click blocked - buttons not ready');
       return false;
     }
   }
 }, true);
 
-// Stop music when page is about to close
-window.addEventListener('pagehide', () => stopMusic(true));
-window.addEventListener('beforeunload', () => stopMusic(true));
+/* ========================================
+   CLEANUP ON PAGE CLOSE
+   ======================================== */
+
+window.addEventListener('pagehide', () => {
+  logVisibility('Page closing (pagehide)');
+  stopMusic(true);
+});
+
+window.addEventListener('beforeunload', () => {
+  logVisibility('Page closing (beforeunload)');
+  stopMusic(true);
+});
 
 /* ========================================
-   TYPEWRITER SYSTEM (UNCHANGED)
+   DEBUG: Log audio events
+   ======================================== */
+
+bgMusic.addEventListener('loadstart', () => logAudio('Event: loadstart'));
+bgMusic.addEventListener('loadeddata', () => logAudio('Event: loadeddata'));
+bgMusic.addEventListener('canplay', () => logAudio('Event: canplay'));
+bgMusic.addEventListener('canplaythrough', () => logAudio('Event: canplaythrough'));
+bgMusic.addEventListener('play', () => logAudio('Event: play'));
+bgMusic.addEventListener('pause', () => logAudio('Event: pause'));
+bgMusic.addEventListener('ended', () => logAudio('Event: ended'));
+bgMusic.addEventListener('error', (e) => {
+  logError('Audio element error event', {
+    error: e.error,
+    code: e.error?.code,
+    message: e.error?.message,
+    src: bgMusic.currentSrc
+  });
+});
+
+// Log initial state
+console.log('='.repeat(50));
+console.log('AUDIO SYSTEM INITIALIZED');
+console.log('='.repeat(50));
+audioState.log();
+console.log('Audio element:', bgMusic);
+console.log('Audio source:', bgMusic.currentSrc || bgMusic.src);
+console.log('='.repeat(50));
+
+/* ========================================
+   TYPEWRITER SYSTEM
    ======================================== */
 
 function typeLines(lines, container, callback, resume = false) {
@@ -833,10 +1025,10 @@ function typeLines(lines, container, callback, resume = false) {
 function startMusicAndNext(id) {
   // Unlock audio if needed
   unlockAudio();
-  
+
   // CRITICAL: Start music synchronously in click handler
-  playMusic();
-  
+  startMusic();
+
   // Then navigate
   next(id);
 }
@@ -863,9 +1055,9 @@ function next(id) {
 
 function showFinalValentine() {
   document.body.classList.add('paused');
-  
+
   // Fade out music over 5 seconds
-  fadeMusicTo(0, 5000, () => {
+  fadeTo(0, 5000, () => {
     resetAudio();
   });
 
