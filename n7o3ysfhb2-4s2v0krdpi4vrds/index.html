@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <title>The City at Night — Valentine</title>
+
+  <!-- Google tag -->
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
@@ -672,6 +675,50 @@ document.addEventListener('click', (e) => {
 // Cleanup on page close
 window.addEventListener('pagehide', () => pauseMusic());
 window.addEventListener('beforeunload', () => pauseMusic());
+
+/* ========================================
+   LOGGING UTILITIES (Kept for debugging)
+   ======================================== */
+
+function logAudio(message, data = {}) {
+  console.log(`[AUDIO] ${message}`, data);
+}
+
+function logVisibility(message, data = {}) {
+  console.log(`[VISIBILITY] ${message}`, data);
+}
+
+function logError(message, error) {
+  console.error(`[ERROR] ${message}`, error);
+}
+
+/* ========================================
+   DEBUG: Log audio events (Kept for debugging)
+   ======================================== */
+
+bgMusic.addEventListener('loadstart', () => logAudio('Event: loadstart'));
+bgMusic.addEventListener('loadeddata', () => logAudio('Event: loadeddata'));
+bgMusic.addEventListener('canplay', () => logAudio('Event: canplay'));
+bgMusic.addEventListener('canplaythrough', () => logAudio('Event: canplaythrough'));
+bgMusic.addEventListener('play', () => logAudio('Event: play'));
+bgMusic.addEventListener('pause', () => logAudio('Event: pause'));
+bgMusic.addEventListener('ended', () => logAudio('Event: ended'));
+bgMusic.addEventListener('error', (e) => {
+  logError('Audio element error event', {
+    error: e.error,
+    code: e.error?.code,
+    message: e.error?.message,
+    src: bgMusic.currentSrc
+  });
+});
+
+// Log initial state
+console.log('='.repeat(50));
+console.log('AUDIO SYSTEM INITIALIZED');
+console.log('='.repeat(50));
+console.log('Audio element:', bgMusic);
+console.log('Audio source:', bgMusic.currentSrc || bgMusic.src);
+console.log('='.repeat(50));
 
 /* ========================================
    TYPEWRITER SYSTEM (Unchanged)
